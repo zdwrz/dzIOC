@@ -19,7 +19,8 @@ public class SanityTest {
     static BeanFactory bf;
     @BeforeClass
     public static void prepare() throws Exception {
-       bf  = new BeanFactory("com.aweiz.dzioc.test.scannedPackage");
+      // bf  = new BeanFactory("com.aweiz.dzioc.test.scannedPackage");
+        bf = new BeanFactory(TestConfigure.class);
     }
 
     @Test

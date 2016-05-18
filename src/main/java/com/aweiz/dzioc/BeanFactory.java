@@ -1,6 +1,7 @@
 package com.aweiz.dzioc;
 
 import com.aweiz.dzioc.annotations.DzBean;
+import com.aweiz.dzioc.annotations.DzConfigure;
 import com.aweiz.dzioc.annotations.DzInject;
 import org.apache.log4j.Logger;
 
@@ -22,28 +23,32 @@ public class BeanFactory {
     private Map<String, Object> beanNames = new ConcurrentHashMap<String, Object>();
 
     public BeanFactory(String... packageToScan) throws Exception {
-        if(packageToScan == null || packageToScan.length < 1){
-            //Throw Exception
-            throw new Exception("DzIOC - packageToScan is empty");
-        }
-        for(String pckg: packageToScan){
-            String path = "/" + pckg.replace(".","/") ;
-            URL url = this.getClass().getResource(path);
-            File pckgDir = new File(url.toURI());
-           // LOGGER.debug(path);
-            if(pckgDir==null || !pckgDir.exists()){
-                throw new Exception("DzIOC - Package Doesn't Exist.");
+       scan(packageToScan);
+    }
+
+    public BeanFactory(Class<?> testConfigureClass) throws Exception {
+        Annotation[] ann = testConfigureClass.getDeclaredAnnotations();
+        for(Annotation a : ann) {
+            if (a instanceof DzConfigure) {
+                String[] pckgs = ((DzConfigure) a).packagesToScan();
+                if(pckgs != null && pckgs.length > 0){
+                    scan(pckgs);
+                }
+                scanClassToInitBean(testConfigureClass);
+                return;
             }
-            recursiveScan(pckgDir,pckg);
-            resolveDependencies();
         }
-        LOGGER.debug(beanContext.size());
-        LOGGER.debug(beanNames.size());
+        throw new Exception("Bad configure class");
+    }
+
+    private void scanClassToInitBean(Class<?> testConfigureClass) {
+
     }
 
     public <T> T getBean(String name, Class<T> clazz) {
         return (T)beanNames.get(name);
     }
+
     public Object getBean(String name) {
         return getBean(name,Object.class);
     }
@@ -57,6 +62,25 @@ public class BeanFactory {
         return (T)beanContext.get(clazz);
     }
 
+    private void scan(String... packageToScan) throws Exception {
+        if(packageToScan == null || packageToScan.length < 1){
+            //Throw Exception
+            throw new Exception("DzIOC - packageToScan is empty");
+        }
+        for(String pckg: packageToScan){
+            String path = "/" + pckg.replace(".","/") ;
+            URL url = this.getClass().getResource(path);
+            File pckgDir = new File(url.toURI());
+            // LOGGER.debug(path);
+            if(pckgDir==null || !pckgDir.exists()){
+                throw new Exception("DzIOC - Package Doesn't Exist.");
+            }
+            recursiveScan(pckgDir,pckg);
+            resolveDependencies();
+        }
+        LOGGER.debug(beanContext.size());
+        LOGGER.debug(beanNames.size());
+    }
     private void resolveDependencies() throws Exception {
         for(Object bean : beanContext.values()){
             Class clazz = bean.getClass();
