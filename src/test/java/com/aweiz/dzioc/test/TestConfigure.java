@@ -1,5 +1,6 @@
 package com.aweiz.dzioc.test;
 
+import com.aweiz.dzioc.annotations.DzBean;
 import com.aweiz.dzioc.annotations.DzConfigure;
 
 /**
@@ -7,4 +8,14 @@ import com.aweiz.dzioc.annotations.DzConfigure;
  */
 @DzConfigure(packagesToScan = {"com.aweiz.dzioc.test.scannedPackage"})
 public class TestConfigure {
+
+    @DzBean
+    public String getTheString(){
+        return "hahahahaha";
+    }
+
+    @DzBean("stringBean")
+    public String getTheString2(){
+        return "hooooooo~";
+    }
 }

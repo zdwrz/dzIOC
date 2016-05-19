@@ -19,7 +19,6 @@ public class SanityTest {
     static BeanFactory bf;
     @BeforeClass
     public static void prepare() throws Exception {
-      // bf  = new BeanFactory("com.aweiz.dzioc.test.scannedPackage");
         bf = new BeanFactory(TestConfigure.class);
     }
 
@@ -48,8 +47,9 @@ public class SanityTest {
     }
 
     @Test
-    public void dummyTest() throws Exception {
-        TestDAO t = new TestDAO();
-        assertTrue(TestDAOInterface.class.isInstance(t));
+    public void stringInjectionTest() throws Exception {
+        TestController tc = bf.getBean("controller",TestController.class);
+        System.out.println(tc.getNameController());
+        assertTrue(tc.getNameController() != null);
     }
 }

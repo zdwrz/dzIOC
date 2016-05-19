@@ -14,7 +14,9 @@ public class TestController {
     {
 
     }
-    private String nameController = "123";
+
+    @DzInject
+    private String nameController ;
 
     @DzInject
     private TestService service;
@@ -26,5 +28,9 @@ public class TestController {
 
     public TestService getService(){
         return this.service;
+    }
+
+    public String getNameController() {
+        return nameController;
     }
 }
