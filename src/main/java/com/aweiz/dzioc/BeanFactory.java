@@ -1,7 +1,10 @@
 package com.aweiz.dzioc;
 
 import com.aweiz.dzaop.AOPMethodAdvisor;
+import com.aweiz.dzaop.Advice;
+import com.aweiz.dzaop.Aspect;
 import com.aweiz.dzaop.DynamicProxyHandler;
+import com.aweiz.dzaop.annotations.DzAdvice;
 import com.aweiz.dzaop.annotations.DzAspect;
 import com.aweiz.dzioc.Exceptions.ConfigurationNotAcceptedException;
 import com.aweiz.dzioc.Exceptions.NoBeanFoundException;
@@ -253,8 +256,25 @@ public class BeanFactory {
         //find the @DzAdvice
         //create Aspect object
         //set it into AOPMethodAdvisor
-        //Object aspectBean = aspectClass.newInstance();
-
+        Object aspectObj = aspectClass.newInstance();
+        Method[] methods = aspectClass.getDeclaredMethods();
+        for (Method m : methods) {
+            Annotation[] ann = m.getDeclaredAnnotations();
+            for(Annotation a : ann) {
+                if (a instanceof DzAdvice) {
+                    Advice advice = ((DzAdvice) a).advice();
+                    String[] pointCuts = ((DzAdvice) a).pointCut();
+                    Aspect aspect = new Aspect();
+                    aspect.setAdvice(advice);
+                    aspect.setMethod(m);
+                    aspect.setAspectObj(aspectObj);
+                    for(String str:pointCuts){
+                        AOPMethodAdvisor.getAdvices().put(str,aspect);
+                    }
+                    LOGGER.debug("Aspect added to AOPMethodAdvisor: " + m);
+                }
+            }
+        }
     }
 
     /**
@@ -274,10 +294,18 @@ public class BeanFactory {
                         Object obj;
                         if(!((DzInject) a).value().trim().equals("")){
                             //injection with named bean
-                            obj = DynamicProxyHandler.newInstance(this.getBean(((DzInject) a).value()));
+                            Object b = this.getBean(((DzInject) a).value());
+                            if (b == null) {
+                                throw new NoBeanFoundException("No such bean found :" + f.getType());
+                            }
+                            obj = DynamicProxyHandler.newInstance(b);
                         }else {
                             //injection with type
-                            obj = DynamicProxyHandler.newInstance(this.getBean(f.getType()));
+                            Object b =this.getBean(f.getType());
+                            if (b == null) {
+                                throw new NoBeanFoundException("No such bean found :" + f.getType());
+                            }
+                            obj = DynamicProxyHandler.newInstance(b);
                         }
                         if (obj == null) {
                             throw new NoBeanFoundException("No such bean found :" + f.getType());

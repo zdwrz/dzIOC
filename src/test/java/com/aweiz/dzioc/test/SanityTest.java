@@ -5,6 +5,7 @@ import com.aweiz.dzioc.test.scannedPackage.TestController;
 import com.aweiz.dzioc.test.scannedPackage.TestDAO;
 import com.aweiz.dzioc.test.scannedPackage.TestDAOInterface;
 import com.aweiz.dzioc.test.scannedPackage.TestService;
+import com.aweiz.dzioc.test.scannedPackage.aopTestPackage.TestBean;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,4 +54,14 @@ public class SanityTest {
         //System.out.println(tc.getNameController());
         assertTrue(tc.getNameController() != null);
     }
+
+    @Test
+    public void aopTest() throws Exception {
+        TestBean tc = bf.getBean("testBean",TestBean.class);
+        String res = tc.sayHi("Dawei");
+        //System.out.println(res);
+        assertTrue(res != null);
+    }
+
+
 }

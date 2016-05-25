@@ -37,10 +37,9 @@ public class DynamicProxyHandler implements InvocationHandler {
         Object ret = null;
         try {
             LOGGER.debug("before method :" + method+ " is called");
-
-            if(AOPMethodAdvisor.containsMethod(method)){
+            Aspect a = null;
+            if((a = AOPMethodAdvisor.getAspect(method)) != null){
                 LOGGER.debug("AOP - Hit");
-                Aspect a = AOPMethodAdvisor.getAspect(method);
                 ret = AOPExecutor.process(new ProcessPoint(obj,method,proxy,args),a);
             }else {
                 //no aspect defined
