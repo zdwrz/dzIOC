@@ -19,14 +19,13 @@ public class TestController {
     private String nameController ;
 
     @DzInject
-    private TestService service;
+    private TestServiceInterface service;
 
     protected int iController = 1;
 
-
     private static final int HI_Controller=0;
 
-    public TestService getService(){
+    public TestServiceInterface getService(){
         return this.service;
     }
 

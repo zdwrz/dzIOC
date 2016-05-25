@@ -43,13 +43,14 @@ public class SanityTest {
     @Test
     public void checkInterfaceInjection() throws Exception {
         TestService tc = bf.getBean("service",TestService.class);
+        tc.getDao().doSomethingInDAO();
         assertTrue(tc.getDao() != null);
     }
 
     @Test
     public void stringInjectionTest() throws Exception {
         TestController tc = bf.getBean("controller",TestController.class);
-        System.out.println(tc.getNameController());
+        //System.out.println(tc.getNameController());
         assertTrue(tc.getNameController() != null);
     }
 }

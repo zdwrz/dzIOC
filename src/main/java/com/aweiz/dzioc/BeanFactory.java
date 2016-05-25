@@ -1,5 +1,11 @@
 package com.aweiz.dzioc;
 
+import com.aweiz.dzaop.AOPMethodAdvisor;
+import com.aweiz.dzaop.DynamicProxyHandler;
+import com.aweiz.dzaop.annotations.DzAspect;
+import com.aweiz.dzioc.Exceptions.ConfigurationNotAcceptedException;
+import com.aweiz.dzioc.Exceptions.NoBeanFoundException;
+import com.aweiz.dzioc.Exceptions.PackageErrorException;
 import com.aweiz.dzioc.annotations.DzBean;
 import com.aweiz.dzioc.annotations.DzConfigure;
 import com.aweiz.dzioc.annotations.DzInject;
@@ -10,6 +16,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,7 +91,7 @@ public class BeanFactory {
                 return;
             }
         }
-        throw new Exception("Bad configure class");
+        throw new ConfigurationNotAcceptedException("Bad configure class");
     }
 
     /**
@@ -161,18 +168,23 @@ public class BeanFactory {
      * @param packageToScan packages to be scanned.
      * @throws Exception
      */
-    private void scan(String... packageToScan) throws Exception {
+    private void scan(String... packageToScan) throws PackageErrorException{
         if(packageToScan == null || packageToScan.length < 1){
             //Throw Exception
-            throw new Exception("DzIOC - packageToScan is empty");
+            throw new PackageErrorException("DzIOC - packageToScan is empty");
         }
         for(String pckg: packageToScan){
             String path = "/" + pckg.replace(".","/") ;
             URL url = this.getClass().getResource(path);
-            File pckgDir = new File(url.toURI());
+            File pckgDir = null;
+            try {
+                pckgDir = new File(url.toURI());
+            }catch (URISyntaxException e){
+                throw new PackageErrorException("DzIOC - packageToScan has wrong URL");
+            }
             // LOGGER.debug(path);
             if(pckgDir==null || !pckgDir.exists()){
-                throw new Exception("DzIOC - Package Doesn't Exist.");
+                throw new PackageErrorException("DzIOC - Package Doesn't Exist.");
             }
             recursiveScan(pckgDir,pckg);
         }
@@ -200,7 +212,8 @@ public class BeanFactory {
     }
 
     /**
-     * It will convert the file name into class qualified name
+     * It will convert the file name into class qualified name. If class has {@link com.aweiz.dzaop.annotations.DzAspect @DzAspect} annotation
+     * AOP will be processed
      * @param iF the file to be loaded and instantiated.
      * @param pckg the package name of the class
      */
@@ -214,7 +227,10 @@ public class BeanFactory {
                 beanContext.put(clazz, bean);
                 String beanName = getBeanName(clazz);
                 beanNames.put(beanName,bean);
-                LOGGER.debug("Created:"+ beanName + " from class:"+ classFile);
+                LOGGER.debug("Bean Created:"+ beanName + " from class:"+ classFile);
+            }else if(isAspectAnnoted(clazz)){
+                processAspect(clazz);
+                LOGGER.debug("AOP Created:"+ clazz.getName() + " from class:"+ classFile);
             }
         } catch (ClassNotFoundException e) {
             LOGGER.error(e.getMessage());
@@ -229,12 +245,25 @@ public class BeanFactory {
     }
 
     /**
+     * Bean is aspect.
+     * @param aspectClass - type of the aspect
+     */
+    private void processAspect(Class<?> aspectClass) throws IllegalAccessException, InstantiationException {
+        //scan the class
+        //find the @DzAdvice
+        //create Aspect object
+        //set it into AOPMethodAdvisor
+        //Object aspectBean = aspectClass.newInstance();
+
+    }
+
+    /**
      * It will traverse the whole beanNames to get the field with {@link com.aweiz.dzioc.annotations.DzBean @DzBean}, then
      * perform Dependency Injection.
      * Use beanNames instead of beanContext is becuase beanNames contains all the beans.
      * @throws Exception - if the dependency is not found.
      */
-    private void resolveDependencies() throws Exception {
+    private void resolveDependencies() throws NoBeanFoundException {
         for(Object bean : beanNames.values()){
             Class clazz = bean.getClass();
             Field[] fields = clazz.getDeclaredFields();
@@ -245,17 +274,22 @@ public class BeanFactory {
                         Object obj;
                         if(!((DzInject) a).value().trim().equals("")){
                             //injection with named bean
-                            obj = this.getBean(((DzInject) a).value());
+                            obj = DynamicProxyHandler.newInstance(this.getBean(((DzInject) a).value()));
                         }else {
                             //injection with type
-                            obj = this.getBean(f.getType());
+                            obj = DynamicProxyHandler.newInstance(this.getBean(f.getType()));
                         }
                         if (obj == null) {
-                            throw new Exception("No such bean found :" + f.getType());
+                            throw new NoBeanFoundException("No such bean found :" + f.getType());
                         } else {
                             f.setAccessible(true);
-                            f.set(bean, obj);
-                            LOGGER.debug("Dependency injected :" + obj);
+                            try {
+                                f.set(bean, obj);
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                                throw new NoBeanFoundException("IllegalAccessException :" + e+" // " + f.getType());
+                            }
+                            //LOGGER.debug("Dependency injected :" + obj);
                         }
                     }
                 }
@@ -292,6 +326,22 @@ public class BeanFactory {
         Annotation[] ann = clazz.getDeclaredAnnotations();
         for (Annotation a : ann) {
             if(a instanceof DzBean){
+                res = true;
+            }
+        }
+        return  res;
+    }
+
+    /**
+     * return true if the Class has annotation {@link com.aweiz.dzaop.annotations.DzAspect @DzAspect}
+     * @param clazz the class type
+     * @return if the class has {@link com.aweiz.dzaop.annotations.DzAspect @DzAspect} annotation
+     */
+    private boolean isAspectAnnoted(Class clazz) {
+        boolean res = false;
+        Annotation[] ann = clazz.getDeclaredAnnotations();
+        for (Annotation a : ann) {
+            if(a instanceof DzAspect){
                 res = true;
             }
         }
