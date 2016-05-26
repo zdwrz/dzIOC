@@ -8,18 +8,32 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 /**
+ * Create a Dynamic proxy for the implementation class from the given interface.
  * Created by daweizhuang on 5/24/16.
  */
 public class DynamicProxyHandler implements InvocationHandler {
 
     private static Logger LOGGER = Logger.getLogger(DynamicProxyHandler.class);
 
+    /**
+     * This is the object of the target class.
+     */
     private Object obj;
 
+    /**
+     * This private constructor will be used in newInstance() method.
+     * @param obj
+     */
     private DynamicProxyHandler(Object obj) {
         this.obj = obj;
     }
 
+    /**
+     * A helper method to create a proxy of the given object.
+     * A {@link com.aweiz.dzaop.ProxyChecker ProxyChecker} is used to check if there are any exclusion for the proxy, like the a String bean is not allowed to create a proxy.
+     * @param obj target object.
+     * @return proxy of the obj.
+     */
     public static Object newInstance(Object obj){
         Class[] interfaces = obj.getClass().getInterfaces();
         if(interfaces == null || interfaces.length == 0){
@@ -32,6 +46,17 @@ public class DynamicProxyHandler implements InvocationHandler {
         return Proxy.newProxyInstance(obj.getClass().getClassLoader(), interfaces, new DynamicProxyHandler(obj));
     }
 
+    /**
+     * This is the wrapper method of the target method.
+     * {@link com.aweiz.dzaop.AOPMethodAdvisor AOPMethodAdvisor} will be used to get the aspect of the method.
+     * If there is no aspect defined for this method, the original method will be executed.
+     * If there is aspect defined for this method, {@link com.aweiz.dzaop.AOPExecutor AOPExecutor} will be used to process the Aspect.
+     * @param proxy the proxy obj.
+     * @param method target method
+     * @param args arguments of the target method
+     * @return the return of the target method.
+     * @throws Throwable
+     */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Object ret = null;

@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ * Currently the AOP doesn't support multiple layers. Only one Aspect will be accepted and only one proceed.
  * Created by daweizhuang on 5/24/16.
  */
 public class ProcessPoint {

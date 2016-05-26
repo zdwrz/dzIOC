@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Used to define a container managed bean.
+ * Put on a class or a method in configuration class.
  * Created by daweizhuang on 5/16/16.
  */
 @Target({ElementType.TYPE, ElementType.METHOD})

@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * To store all aspect in a map.
+ * To find aspect for a particular method.
  * Created by daweizhuang on 5/24/16.
  */
 public class AOPMethodAdvisor {

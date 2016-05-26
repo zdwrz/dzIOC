@@ -8,6 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Used to create pointcut and advice.
  * Created by daweizhuang on 5/24/16.
  */
 @Target(ElementType.METHOD)

@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Put on a class to define a configuration class. Only one configuration file is allowed.
  * Created by daweizhuang on 5/18/16.
  */
 @Target(ElementType.TYPE)

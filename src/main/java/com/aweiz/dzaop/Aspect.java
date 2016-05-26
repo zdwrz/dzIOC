@@ -3,7 +3,14 @@ package com.aweiz.dzaop;
 import java.lang.reflect.Method;
 
 /**
+ *
+ * Target Object.
+ * Proxy Object.
+ * Aspect Object - The Bean with @DzAspect
+ *
+ * method is the method defined in the Aspect Object.
  * Created by daweizhuang on 5/24/16.
+ *
  */
 public class Aspect {
     private Advice advice;

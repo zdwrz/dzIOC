@@ -1,6 +1,7 @@
 package com.aweiz.dzaop;
 
 /**
+ * Filter the Classes that are not suitable for AOP.
  * Created by daweizhuang on 5/24/16.
  */
 public class ProxyChecker {

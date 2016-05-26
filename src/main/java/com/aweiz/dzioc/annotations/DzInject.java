@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Perform DI.
  * Created by daweizhuang on 5/17/16.
  */
 @Target(ElementType.FIELD)
