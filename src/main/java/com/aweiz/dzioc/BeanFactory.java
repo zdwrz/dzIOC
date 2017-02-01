@@ -280,7 +280,7 @@ public class BeanFactory {
     /**
      * It will traverse the whole beanNames to get the field with {@link com.aweiz.dzioc.annotations.DzBean @DzBean}, then
      * perform Dependency Injection.
-     * Use beanNames instead of beanContext is becuase beanNames contains all the beans.
+     * Use beanNames instead of beanContext is because beanNames contains all the beans.
      * @throws Exception - if the dependency is not found.
      */
     private void resolveDependencies() throws NoBeanFoundException {
