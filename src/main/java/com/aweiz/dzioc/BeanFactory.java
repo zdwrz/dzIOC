@@ -60,6 +60,12 @@ public class BeanFactory {
     private Map<String, Object> beanNames = new ConcurrentHashMap<String, Object>();
 
     /**
+     * All bean with isController = true is here
+     * For usage of MVC
+     */
+    private Map<Class, Object> controllers = new ConcurrentHashMap<>();
+
+    /**
      * To initialize the beans using packages array.
      * Notice : No configuration class will be taken into consideration.
      * @param packageToScan as name indicated
@@ -91,6 +97,7 @@ public class BeanFactory {
                 resolveDependencies();
                 LOGGER.debug(beanContext.size() +" bean(s) created as singleton");
                 LOGGER.debug(beanNames.size() + " bean(s) created as named bean");
+                LOGGER.debug(controllers.size() + " bean(s) created as Controller");
                 return;
             }
         }
@@ -228,6 +235,9 @@ public class BeanFactory {
             if(isBeanAnnoted(clazz)) {
                 Object bean = clazz.newInstance();
                 beanContext.put(clazz, bean);
+                if (isControllerAnnoted(clazz)) {
+                    controllers.put(clazz, bean);
+                }
                 String beanName = getBeanName(clazz);
                 beanNames.put(beanName,bean);
                 LOGGER.debug("Bean Created:"+ beanName + " from class:"+ classFile);
@@ -359,7 +369,23 @@ public class BeanFactory {
         }
         return  res;
     }
-
+    /**
+     * return true if the Class has annotation {@link com.aweiz.dzioc.annotations.DzBean @DzBean} and isController=true
+     * @param clazz the class type
+     * @return if the class has {@link com.aweiz.dzioc.annotations.DzBean @DzBean} and isController=true annotation
+     */
+    private boolean isControllerAnnoted(Class clazz) {
+        boolean res = false;
+        Annotation[] ann = clazz.getDeclaredAnnotations();
+        for (Annotation a : ann) {
+            if(a instanceof DzBean){
+                if(((DzBean) a).isController()) {
+                    res = true;
+                }
+            }
+        }
+        return  res;
+    }
     /**
      * return true if the Class has annotation {@link com.aweiz.dzaop.annotations.DzAspect @DzAspect}
      * @param clazz the class type
@@ -374,5 +400,13 @@ public class BeanFactory {
             }
         }
         return  res;
+    }
+
+    /**
+     * Helper method for MVC to create HandlerMapping
+     * @return controller class and object
+     */
+    public Map<Class, Object> getControllers() {
+        return controllers;
     }
 }

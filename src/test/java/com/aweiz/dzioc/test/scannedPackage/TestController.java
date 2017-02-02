@@ -6,7 +6,7 @@ import com.aweiz.dzioc.annotations.DzInject;
 /**
  * Created by daweizhuang on 5/16/16.
  */
-@DzBean("controller")
+@DzBean(value = "controller", isController = true)
 public class TestController {
     static {
 
