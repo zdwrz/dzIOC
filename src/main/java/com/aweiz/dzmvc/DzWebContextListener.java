@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebListener;
 
 /**
  * Created by daweizhuang on 2/2/17.
+ * Hook of the web mvc.
  */
 public class DzWebContextListener implements ServletContextListener {
     private static Logger LOGGER = Logger.getLogger(DzWebContextListener.class);
