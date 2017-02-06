@@ -33,10 +33,10 @@ public class DzMvcFrontController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         LOGGER.info("Hit FC doGET");
         DzWebContext context = (DzWebContext) this.getServletContext().getAttribute("WebContext");
-        WebRequest request = new WebRequest();
+        WebRequest request = new WebRequest(req.getRequestURI());
         Map.Entry<Method,Object> methodCall = context.getHandler(request);
         try {
-            ((Method)(methodCall.getValue())).invoke(methodCall.getValue());
+            methodCall.getKey().invoke(methodCall.getValue());
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
