@@ -2,6 +2,7 @@ package com.aweiz.dzmvc;
 
 import com.aweiz.dzioc.BeanFactory;
 import com.aweiz.dzmvc.annotations.DzMapping;
+import com.aweiz.dzmvc.exceptions.URLMappingException;
 import com.aweiz.dzmvc.request.WebRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -44,6 +45,9 @@ public class DzWebContext {
             Class clazz = entry.getKey();
             Object controllerObj = entry.getValue();
             for (Method m : clazz.getDeclaredMethods()) {
+                if(m.getReturnType() == void.class){
+                    throw new URLMappingException("The controller :" + m + " returns VOID?");
+                }
                 Annotation[] ann = m.getDeclaredAnnotations();
                 for(Annotation a : ann) {
                     if (a instanceof DzMapping) {
@@ -52,14 +56,17 @@ public class DzWebContext {
                         if (StringUtils.isEmpty(url)) {
                             throw new URLMappingException("The controller :" + m + " doesn't have any URL mapped.");
                         }
-                        Boolean isRest = mappingAnn.isRest();
                         String httpMethod = mappingAnn.httpMethod();
-                        String produces = mappingAnn.produce();
-                        WebRequest wr = new WebRequest(url,isRest,httpMethod,produces);
+                        if(httpMethod == null || httpMethod.equals("")){
+                            httpMethod = "ALL";
+                        }
+                        WebRequest wr = new WebRequest(url,httpMethod);
                         m.setAccessible(true);
                         Map.Entry<Method,Object> handler = new HashMap.SimpleEntry<>(m,controllerObj);
+                        if(handlerMapping.containsKey(wr)){
+                            LOGGER.warn("The controller :" + m +" uses the URL mapping: " + wr.getUrl() + ". This may be caused by using same URL but different HttpMethod");
+                        }
                         handlerMapping.put(wr, handler);
-                        LOGGER.debug("Controller Registered: " + m);
                     }
                 }
             }

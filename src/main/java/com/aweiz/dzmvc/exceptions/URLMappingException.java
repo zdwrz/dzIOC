@@ -1,4 +1,4 @@
-package com.aweiz.dzmvc;
+package com.aweiz.dzmvc.exceptions;
 
 /**
  * Created by daweizhuang on 2/6/17.

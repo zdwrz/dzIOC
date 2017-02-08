@@ -1,23 +1,24 @@
 package com.aweiz.dzmvc.request;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * Created by daweizhuang on 2/2/17.
  */
 public class WebRequest {
     private String url;
-    private Boolean isRest;
-    private String httpMethod;
-    private String produce;
+    private String httpMethod = "ALL";
+
+    public WebRequest() {}
 
     public WebRequest(String url) {
         this.url = url;
     }
 
-    public WebRequest(String url, Boolean isRest, String httpMethod, String produce) {
+    public WebRequest(String url, String httpMethod) {
         this.url = url;
-        this.isRest = isRest;
         this.httpMethod = httpMethod;
-        this.produce = produce;
     }
 
     public String getUrl() {
@@ -28,28 +29,12 @@ public class WebRequest {
         this.url = url;
     }
 
-    public Boolean getRest() {
-        return isRest;
-    }
-
-    public void setRest(Boolean rest) {
-        isRest = rest;
-    }
-
     public String getHttpMethod() {
         return httpMethod;
     }
 
     public void setHttpMethod(String httpMethod) {
         this.httpMethod = httpMethod;
-    }
-
-    public String getProduce() {
-        return produce;
-    }
-
-    public void setProduce(String produce) {
-        this.produce = produce;
     }
 
     @Override
@@ -60,15 +45,25 @@ public class WebRequest {
 
         WebRequest that = (WebRequest) o;
 
-        return new org.apache.commons.lang3.builder.EqualsBuilder()
+        return new EqualsBuilder()
                 .append(url, that.url)
+                .append(httpMethod, that.httpMethod)
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new org.apache.commons.lang3.builder.HashCodeBuilder(17, 37)
+        return new HashCodeBuilder(17, 37)
                 .append(url)
+                .append(httpMethod)
                 .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "WebRequest{" +
+                "url='" + url + '\'' +
+                ", httpMethod='" + httpMethod + '\'' +
+                '}';
     }
 }

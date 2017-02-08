@@ -12,7 +12,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DzMapping {
     String value() default "";
-    boolean isRest() default false;
     String httpMethod() default "";
-    String produce() default "";
 }
